@@ -7,6 +7,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -29,6 +30,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .beginTransaction()
                 .add(R.id.map, miMapa)
                 .commit();
+        // Registrar escucha onMapReadyCallback
+        miMapa.getMapAsync(this);
     }
 
 
@@ -37,9 +40,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        /*LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
+
+        //Tras buscar latitud y longitud de mi direccion las he añadido
+        LatLng miCasaVigo = new LatLng(42.226136, -8.707154);
+        //Añadimos una marca en las coordenadas indicadas
+        mMap.addMarker(new MarkerOptions()
+            .position(miCasaVigo)
+            .title("Mi casa"));
+
+        //Posicionamos las cámara en las coordenadas indicadas
+    CameraPosition cameraPosition = CameraPosition.builder()
+            .target(miCasaVigo)
+            .zoom(15)
+            .build();
+
+    mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
     }
 }
