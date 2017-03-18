@@ -23,9 +23,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int LOCATION_REQUEST_CODE = 1;
     private GoogleMap mMap;
     private static final int PERMISO = 1;
-    //Creamos un atributo de la clase fragment_mapa
     private fprimer_mapa miMapa;
-    double latitud, longitud, distanciaEntrePuntos;
+    double latitud, longitud, diferencia;
     double marcalatitud=42.211;
     double marcalongitud=-8.737;
     LatLng miCasaVigo;
@@ -34,6 +33,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+
 
         //Con el FragmentManager y el fragmento que hemos creado, hacemos que se muestre
         //Primero instanciamos un objeto del tipo de fragment y con el FragmentManager lo vinculamos al layout 'map'
@@ -45,39 +46,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .commit();
         // Registrar escucha onMapReadyCallback
         miMapa.getMapAsync(this);
+
+        recogeUbicacion();
     }
 
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+
         solicitarPermiso();
-        mMap.getUiSettings().setZoomControlsEnabled(true); //Controles integrados de zoom
-        mMap.getUiSettings().setCompassEnabled(true); //Brújula
-//Tras buscar latitud y longitud de mi direccion las he añadido
-        // LatLng miCasaVigo = new LatLng(42.21107305348766,-8.737963736057281);
 
+        mMap = googleMap;
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.getUiSettings().setCompassEnabled(true);
         miCasaVigo = new LatLng(marcalatitud,marcalongitud);
-        //LatLng miCasaVigo = new LatLng(capturaLatitud(),capturaLatitud());
-        double numAleatorio=generaNumero();
-        int radio=56;
-
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
-
+        creaPuntoInteres(57);
 
     }
+
+    /*
+    *Copiado de un Tutorial
+     */
     public void solicitarPermiso(){
         int checkPerm = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
-        if (checkPerm == PackageManager.PERMISSION_GRANTED) { //Concede el permiso para la localización
+        if (checkPerm == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // Aquí se muestra el diálogo explicativo de porque se necesitan los permisos
+
             } else {
-                // Se solicitan los permisos
+
                 ActivityCompat.requestPermissions(
                         this,
                         new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
@@ -86,11 +88,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    /*
+    *Método para crear el punto de interés que habrá que localizar
+     */
     public void creaPuntoInteres(int radio){
 
         //Añadimos una marca en las coordenadas indicadas
         LatLng puntoInteres = new LatLng(generaCoordenada(marcalatitud),generaCoordenada(marcalongitud));
-        // LatLng puntoInteres = new LatLng(capturaLatitud(),capturaLongitud());
+
+        //Creamos un punto dentro de un círculo
         mMap.addMarker(new MarkerOptions().position(puntoInteres).title("Punto Interes"));
         CircleOptions circleOptions = new CircleOptions()
                 .center(miCasaVigo)
@@ -102,6 +108,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    /*
+    *Copiado de una página tutorial tal cual
+     */
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (requestCode == PERMISO) {
@@ -124,12 +133,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    /**
-     * Obtiene la posición actual del usuario
-     */
-    public void obtenerUbicacion(){
+    /*
+     *Recoge la localización actual del dispositivo
+      */
+    public void recogeUbicacion(){
         LocationManager locMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
+        //Hubo que añadir el android. para que cogiese el Manifest
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -143,7 +153,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         public void onLocationChanged(Location loc) {
-          
+
             compararDistancia(loc);
             verDistancia(loc);
 
@@ -155,9 +165,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
         }
-
-
-
 
         public void onProviderEnabled(String provider) {
             Toast.makeText(getApplicationContext(), "GPS activado",
@@ -172,13 +179,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     };
 
 
+    /*
+    *Necesitamos un número aleatorio para crear las coordenadas
+     */
     public double generaNumero(){
+
         double resultado=0;
         resultado=(Math.random()*(31-10)+10)/100000;
 
         return resultado;
     }
 
+    /*
+    *Genera unas coordenadas aleatorias para crear una marca dentro de un circulo
+    * Se empleará para crear el punto de interés que hay que localizar
+     */
     public double generaCoordenada(double coor){
         double resultado=0;
         int temp = (Math.random() <= 0.5) ? 1 : 2;
@@ -187,20 +202,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         return resultado;
     }
+
+
     public double verDistancia(Location loc) {
+
         latitud = loc.getLatitude();
         longitud = loc.getLongitude();
-        Location myLocation = new Location("Mi localización");
+        Location myLocation = new Location("YO");
         myLocation.setLatitude(latitud);
         myLocation.setLongitude(longitud);
-
-        Location markerLocation = new Location("Localización marca");
-
+        Location markerLocation = new Location("Punto Interés");
         markerLocation.setLatitude(marcalatitud);
         markerLocation.setLongitude(marcalongitud);
-        distanciaEntrePuntos = myLocation.distanceTo(markerLocation);
+        diferencia = myLocation.distanceTo(markerLocation);
 
-        return distanciaEntrePuntos;
+        return diferencia;
     }
 
 }
