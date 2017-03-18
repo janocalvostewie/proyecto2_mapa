@@ -149,7 +149,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    LocationListener locLis= new LocationListener() {
+    LocationListener escuchaLocalizacion = new LocationListener() {
 
         @Override
         public void onLocationChanged(Location loc) {
@@ -166,6 +166,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
 
+        /*
+        *Activar/Desactivar el GPS
+         */
         public void onProviderEnabled(String provider) {
             Toast.makeText(getApplicationContext(), "GPS activado",
                     Toast.LENGTH_SHORT).show();
@@ -204,6 +207,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    /*
+    *Analiza la distancia entre dos puntos
+    * La localización del dispositivi con la generada en el punto de interés
+     */
     public double verDistancia(Location loc) {
 
         latitud = loc.getLatitude();

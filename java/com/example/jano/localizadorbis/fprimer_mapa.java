@@ -13,6 +13,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 public class fprimer_mapa extends SupportMapFragment {
 
 
+    /*
+    *Constructor del map view que usaremos
+     */
     public fprimer_mapa() {
 
     }
